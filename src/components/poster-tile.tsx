@@ -32,9 +32,7 @@ export function PosterTile({ movie, className, overlay = "minimal" }: Props) {
         {overlay !== "none" && (
           <div
             className={`absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent transition-opacity duration-500 ${
-              overlay === "always"
-                ? "opacity-100"
-                : "opacity-0 group-hover:opacity-100"
+              overlay === "always" ? "opacity-100" : "opacity-0 group-hover:opacity-100"
             }`}
           />
         )}

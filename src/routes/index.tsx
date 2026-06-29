@@ -11,7 +11,8 @@ export const Route = createFileRoute("/")({
       { title: "Slate — A cinematic journal" },
       {
         name: "description",
-        content: "Slate is a curated cinematic journal — track films, log vibes, and revisit the moments that moved you.",
+        content:
+          "Slate is a curated cinematic journal — track films, log vibes, and revisit the moments that moved you.",
       },
       { property: "og:title", content: "Slate — A cinematic journal" },
       { property: "og:description", content: "A curated journal for the films that move you." },
@@ -44,16 +45,17 @@ function Home() {
         <div className="mt-6 mb-6 flex flex-wrap items-end justify-between gap-6 lg:mt-0">
           <div className="max-w-xl">
             <p className="label-eyebrow">
-              <span className="text-[var(--gold)]">●</span>&nbsp;&nbsp;Now Showing &nbsp;·&nbsp; Vol. 04
+              <span className="text-[var(--gold)]">●</span>&nbsp;&nbsp;Now Showing &nbsp;·&nbsp;
+              Vol. 04
             </p>
             <h2 className="mt-3 font-serif text-3xl italic leading-[1.05] tracking-tight sm:text-5xl">
               Your slate, <span className="text-white/40">re-arranged</span> for tonight.
             </h2>
           </div>
-          <p className="hidden max-w-xs text-sm leading-relaxed text-white/50 md:block">
-            A modular reading-room of films in progress, on the horizon, and recently
-            committed to memory.
-          </p>
+          {/* <p className="hidden max-w-xs text-sm leading-relaxed text-white/50 md:block">
+            A modular reading-room of films in progress, on the horizon, and recently committed to
+            memory.
+          </p> */}
         </div>
 
         {/* BENTO GRID */}
@@ -83,9 +85,7 @@ function Home() {
                     Director · Denis Villeneuve
                   </span>
                 </div>
-                <span className="font-serif text-sm italic text-[var(--gold)]">
-                  No. 001
-                </span>
+                <span className="font-serif text-sm italic text-[var(--gold)]">No. 001</span>
               </div>
 
               {/* bottom content */}
@@ -105,7 +105,9 @@ function Home() {
                       />
                     </div>
                     <div className="mt-2 flex items-center justify-between text-[10px] uppercase tracking-[0.22em] text-white/50">
-                      <span>{hero.year} · {hero.runtime}</span>
+                      <span>
+                        {hero.year} · {hero.runtime}
+                      </span>
                       <span>{hero.progress ?? 40}% — 58 min left</span>
                     </div>
                   </div>
@@ -182,9 +184,7 @@ function Home() {
                     params={{ id: m.id }}
                     className="group flex items-center gap-4"
                   >
-                    <span className="w-5 font-serif text-sm italic text-white/35">
-                      0{i + 1}
-                    </span>
+                    <span className="w-5 font-serif text-sm italic text-white/35">0{i + 1}</span>
                     <div className="h-14 w-10 shrink-0 overflow-hidden rounded-md ring-1 ring-white/10">
                       <img
                         src={m.poster}

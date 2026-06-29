@@ -1,13 +1,11 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
-import tsconfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "@tailwindcss/vite";
 import { nitro } from "nitro/vite";
 
 export default defineConfig(({ command }) => ({
   plugins: [
-    tsconfigPaths({ projects: ["./tsconfig.json"] }),
     tailwindcss(),
     tanstackStart({
       importProtection: {
@@ -20,9 +18,10 @@ export default defineConfig(({ command }) => ({
       server: { entry: "server" },
     }),
     react(),
-    command === "build" && nitro({
-      defaultPreset: "cloudflare-module",
-    }),
+    command === "build" &&
+      nitro({
+        defaultPreset: "cloudflare-module",
+      }),
   ].filter(Boolean),
   css: {
     transformer: "lightningcss",
@@ -41,15 +40,17 @@ export default defineConfig(({ command }) => ({
     ],
   },
   optimizeDeps: {
-    include: ["react", "react-dom", "react-dom/client", "react/jsx-runtime", "react/jsx-dev-runtime"],
+    include: [
+      "react",
+      "react-dom",
+      "react-dom/client",
+      "react/jsx-runtime",
+      "react/jsx-dev-runtime",
+    ],
     ignoreOutdatedRequests: true,
   },
   server: {
     host: "::",
     port: 8080,
-    watch: {
-      stabilityThreshold: 1000,
-      pollInterval: 100,
-    },
   },
 }));

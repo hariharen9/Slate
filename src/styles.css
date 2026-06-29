@@ -43,12 +43,12 @@
 
 :root {
   --radius: 1rem;
-  --background: oklch(0.08 0 0);          /* near pure black #0d0d0d */
+  --background: oklch(0.08 0 0); /* near pure black #0d0d0d */
   --foreground: oklch(0.97 0 0);
-  --ink: oklch(0.12 0 0);                 /* #1a1a1a surface */
+  --ink: oklch(0.12 0 0); /* #1a1a1a surface */
   --ink-2: oklch(0.16 0 0);
-  --gold: oklch(0.78 0.13 85);            /* ≈ #c9a84c */
-  --gold-soft: oklch(0.88 0.11 88);       /* ≈ #f0d78c */
+  --gold: oklch(0.78 0.13 85); /* ≈ #c9a84c */
+  --gold-soft: oklch(0.88 0.11 88); /* ≈ #f0d78c */
   --card: var(--ink);
   --card-foreground: oklch(0.97 0 0);
   --popover: var(--ink);
@@ -68,10 +68,14 @@
   --ring: var(--gold);
 }
 
-.dark { color-scheme: dark; }
+.dark {
+  color-scheme: dark;
+}
 
 @layer base {
-  html, body, #root {
+  html,
+  body,
+  #root {
     background-color: #0d0d0d;
     color: var(--color-foreground);
     min-height: 100%;
@@ -87,12 +91,21 @@
     letter-spacing: -0.005em;
   }
   /* Hide scrollbars */
-  ::-webkit-scrollbar { display: none; }
-  * { scrollbar-width: none; -ms-overflow-style: none; }
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
 }
 
-@utility font-serif { font-family: var(--font-serif); }
-@utility font-sans  { font-family: var(--font-sans); }
+@utility font-serif {
+  font-family: var(--font-serif);
+}
+@utility font-sans {
+  font-family: var(--font-sans);
+}
 
 @utility label-eyebrow {
   font-family: var(--font-sans);

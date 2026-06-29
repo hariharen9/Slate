@@ -8,8 +8,8 @@ import { MOVIES } from "@/lib/movies";
 export const Route = createFileRoute("/search")({
   head: () => ({
     meta: [
-      { title: "The Vault — Slate" },
-      { name: "description", content: "Search the Slate vault by title, genre, or vibe." },
+      { title: "Explore — Slate" },
+      { name: "description", content: "Search the entire catalog of movies and TV series." },
     ],
   }),
   component: SearchPage,
@@ -32,10 +32,10 @@ function SearchPage() {
     <AppShell>
       <div className="px-4 pb-32 pt-8 sm:px-8 lg:px-10 lg:pt-10">
         <p className="label-eyebrow">
-          <span className="text-[var(--gold)]">●</span>&nbsp;&nbsp;The Vault
+          <span className="text-[var(--gold)]">●</span>&nbsp;&nbsp;Explore
         </p>
         <h1 className="mt-3 font-serif text-4xl italic tracking-tight sm:text-6xl">
-          Search by <span className="text-white/40">title, mood,</span> or memory.
+          Search the <span className="text-white/40">catalog.</span>
         </h1>
 
         <div className="mt-8 flex items-center gap-3 border-b border-white/15 pb-3">

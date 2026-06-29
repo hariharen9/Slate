@@ -1,11 +1,12 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Search, BarChart3 } from "lucide-react";
+import { Home, Search, BarChart3, Bookmark } from "lucide-react";
 import { motion } from "framer-motion";
 import type { ReactNode } from "react";
 
 const NAV = [
   { to: "/", label: "Curated", icon: Home },
-  { to: "/search", label: "The Vault", icon: Search },
+  { to: "/search", label: "Explore", icon: Search },
+  { to: "/library", label: "Library", icon: Bookmark },
   { to: "/stats", label: "Journal", icon: BarChart3 },
 ] as const;
 
@@ -60,25 +61,24 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <main className="lg:pl-56">{children}</main>
 
-      {/* Mobile floating bottom bar */}
-      <nav className="fixed inset-x-4 bottom-4 z-40 lg:hidden">
-        <div className="mx-auto flex max-w-sm items-center justify-around rounded-full px-3 py-2 glass-strong">
-          {[
-            { to: "/", icon: Home, label: "Home" },
-            { to: "/search", icon: Search, label: "Vault" },
-            { to: "/stats", icon: BarChart3, label: "Journal" },
-          ].map((item) => {
+      {/* Mobile full-width bottom bar */}
+      <nav className="fixed inset-x-0 bottom-0 z-40 lg:hidden">
+        <div className="flex w-full items-center justify-around border-t border-white/10 px-2 pb-6 pt-3 glass-strong rounded-t-3xl">
+          {NAV.map((item) => {
             const active = pathname === item.to;
             const Icon = item.icon;
             return (
               <Link key={item.to} to={item.to as never} className="flex-1">
                 <motion.div
                   whileTap={{ scale: 0.92 }}
-                  className={`mx-auto grid h-11 w-11 place-items-center rounded-full transition-colors ${
-                    active ? "bg-[var(--gold)] text-black" : "text-white/70"
+                  className={`flex flex-col items-center gap-1.5 transition-colors ${
+                    active ? "text-[var(--gold)]" : "text-white/45 hover:text-white/70"
                   }`}
                 >
-                  <Icon className="h-[18px] w-[18px]" strokeWidth={2} />
+                  <Icon className="h-5 w-5" strokeWidth={active ? 2.5 : 2} />
+                  <span className="text-[9px] font-semibold uppercase tracking-widest">
+                    {item.label}
+                  </span>
                 </motion.div>
               </Link>
             );

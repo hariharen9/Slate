@@ -46,10 +46,7 @@ export function PosterCard({ movie, size = "md", showProgress }: Props) {
         </div>
         {showProgress && movie.progress != null && (
           <div className="absolute inset-x-0 bottom-0 h-1 bg-white/10">
-            <div
-              className="h-full bg-white"
-              style={{ width: `${movie.progress}%` }}
-            />
+            <div className="h-full bg-white" style={{ width: `${movie.progress}%` }} />
           </div>
         )}
       </motion.div>
