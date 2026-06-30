@@ -1,9 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import type { Movie } from "@/lib/movies";
+import type { SlateMovie } from "@/lib/movies";
 
 type Props = {
-  movie: Movie;
+  movie: SlateMovie;
   className?: string;
   /** Overlay variant: 'minimal' shows nothing until hover, 'always' shows label always */
   overlay?: "minimal" | "always" | "none";
@@ -13,7 +13,7 @@ export function PosterTile({ movie, className, overlay = "minimal" }: Props) {
   return (
     <Link
       to="/movie/$id"
-      params={{ id: movie.id }}
+      params={{ id: String(movie.id) }}
       className={`group relative block tile ${className ?? ""}`}
     >
       <motion.div

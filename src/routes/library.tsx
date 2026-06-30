@@ -1,10 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppShell } from "@/components/app-shell";
 import { PosterTile } from "@/components/poster-tile";
+import { AuthGuard } from "@/components/auth-guard";
+import { PosterSkeleton } from "@/components/poster-skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { MOVIES } from "@/lib/movies";
+import { useAuth } from "@/lib/auth-context";
+import { getUserLibrary, type LibraryEntry, type MovieStatus } from "@/lib/firestore";
+import { posterUrl, backdropUrl, type SlateMovie } from "@/lib/movies";
 import { Film, Tv } from "lucide-react";
 
 export const Route = createFileRoute("/library")({
@@ -18,7 +22,25 @@ export const Route = createFileRoute("/library")({
 });
 
 type Filter = "all" | "movie" | "tv";
-type Status = "to-watch" | "may-watch" | "watched";
+
+function entryToSlateMovie(entry: LibraryEntry): SlateMovie {
+  return {
+    id: entry.tmdbId,
+    type: entry.type,
+    title: entry.title,
+    year: entry.year,
+    runtime: entry.runtime,
+    genre: entry.genre,
+    genres: [],
+    poster: posterUrl(entry.posterPath),
+    posterPath: entry.posterPath,
+    backdrop: backdropUrl(entry.backdropPath),
+    backdropPath: entry.backdropPath,
+    overview: entry.overview,
+    voteAverage: entry.voteAverage,
+    vibes: [],
+  };
+}
 
 function LibraryPage() {
   const [filter, setFilter] = useState<Filter>("all");
@@ -33,52 +55,54 @@ function LibraryPage() {
           Your <span className="text-white/40">queue,</span> catalogued.
         </h1>
 
-        <Tabs defaultValue="to-watch" className="mt-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-white/10 pb-4">
-            <TabsList className="bg-white/5 p-1 glass">
-              <TabsTrigger
-                value="to-watch"
-                className="text-xs uppercase tracking-widest data-[state=active]:bg-[var(--gold)] data-[state=active]:text-black rounded-full px-4 py-1.5"
-              >
-                To Watch
-              </TabsTrigger>
-              <TabsTrigger
-                value="may-watch"
-                className="text-xs uppercase tracking-widest data-[state=active]:bg-[var(--gold)] data-[state=active]:text-black rounded-full px-4 py-1.5"
-              >
-                May Watch
-              </TabsTrigger>
-              <TabsTrigger
-                value="watched"
-                className="text-xs uppercase tracking-widest data-[state=active]:bg-[var(--gold)] data-[state=active]:text-black rounded-full px-4 py-1.5"
-              >
-                Watched
-              </TabsTrigger>
-            </TabsList>
+        <AuthGuard message="Sign in to build your collection.">
+          <Tabs defaultValue="to-watch" className="mt-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-white/10 pb-4">
+              <TabsList className="bg-white/5 p-1 glass">
+                <TabsTrigger
+                  value="to-watch"
+                  className="text-xs uppercase tracking-widest data-[state=active]:bg-[var(--gold)] data-[state=active]:text-black rounded-full px-4 py-1.5"
+                >
+                  To Watch
+                </TabsTrigger>
+                <TabsTrigger
+                  value="may-watch"
+                  className="text-xs uppercase tracking-widest data-[state=active]:bg-[var(--gold)] data-[state=active]:text-black rounded-full px-4 py-1.5"
+                >
+                  May Watch
+                </TabsTrigger>
+                <TabsTrigger
+                  value="watched"
+                  className="text-xs uppercase tracking-widest data-[state=active]:bg-[var(--gold)] data-[state=active]:text-black rounded-full px-4 py-1.5"
+                >
+                  Watched
+                </TabsTrigger>
+              </TabsList>
 
-            <div className="flex items-center gap-2">
-              <FilterButton active={filter === "all"} onClick={() => setFilter("all")}>
-                All
-              </FilterButton>
-              <FilterButton active={filter === "movie"} onClick={() => setFilter("movie")}>
-                <Film className="h-3.5 w-3.5" /> Movies
-              </FilterButton>
-              <FilterButton active={filter === "tv"} onClick={() => setFilter("tv")}>
-                <Tv className="h-3.5 w-3.5" /> TV Series
-              </FilterButton>
+              <div className="flex items-center gap-2">
+                <FilterButton active={filter === "all"} onClick={() => setFilter("all")}>
+                  All
+                </FilterButton>
+                <FilterButton active={filter === "movie"} onClick={() => setFilter("movie")}>
+                  <Film className="h-3.5 w-3.5" /> Movies
+                </FilterButton>
+                <FilterButton active={filter === "tv"} onClick={() => setFilter("tv")}>
+                  <Tv className="h-3.5 w-3.5" /> TV Series
+                </FilterButton>
+              </div>
             </div>
-          </div>
 
-          <TabsContent value="to-watch" className="mt-6">
-            <LibraryGrid status="to-watch" filter={filter} />
-          </TabsContent>
-          <TabsContent value="may-watch" className="mt-6">
-            <LibraryGrid status="may-watch" filter={filter} />
-          </TabsContent>
-          <TabsContent value="watched" className="mt-6">
-            <LibraryGrid status="watched" filter={filter} />
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="to-watch" className="mt-6">
+              <LibraryGrid status="to-watch" filter={filter} />
+            </TabsContent>
+            <TabsContent value="may-watch" className="mt-6">
+              <LibraryGrid status="may-watch" filter={filter} />
+            </TabsContent>
+            <TabsContent value="watched" className="mt-6">
+              <LibraryGrid status="watched" filter={filter} />
+            </TabsContent>
+          </Tabs>
+        </AuthGuard>
       </div>
     </AppShell>
   );
@@ -107,14 +131,30 @@ function FilterButton({
   );
 }
 
-function LibraryGrid({ status, filter }: { status: Status; filter: Filter }) {
-  const results = useMemo(() => {
-    return MOVIES.filter((m) => {
-      if (m.status !== status) return false;
-      if (filter !== "all" && m.type !== filter) return false;
-      return true;
+function LibraryGrid({ status, filter }: { status: MovieStatus; filter: Filter }) {
+  const { user } = useAuth();
+  const [entries, setEntries] = useState<LibraryEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    setLoading(true);
+    const typeFilter = filter === "all" ? undefined : filter;
+    getUserLibrary(user.uid, status, typeFilter).then((items) => {
+      setEntries(items);
+      setLoading(false);
     });
-  }, [status, filter]);
+  }, [user, status, filter]);
+
+  if (loading) {
+    return (
+      <div className="grid auto-rows-[220px] grid-cols-2 gap-3 sm:auto-rows-[260px] sm:grid-cols-3 md:gap-4 lg:grid-cols-5">
+        <PosterSkeleton count={6} className="h-full w-full" />
+      </div>
+    );
+  }
+
+  const results = entries.map(entryToSlateMovie);
 
   if (results.length === 0) {
     return (

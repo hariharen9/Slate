@@ -1,9 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import type { Movie } from "@/lib/movies";
+import type { SlateMovie } from "@/lib/movies";
 
 type Props = {
-  movie: Movie;
+  movie: SlateMovie;
   size?: "sm" | "md" | "lg";
   showProgress?: boolean;
 };
@@ -18,7 +18,7 @@ export function PosterCard({ movie, size = "md", showProgress }: Props) {
   return (
     <Link
       to="/movie/$id"
-      params={{ id: movie.id }}
+      params={{ id: String(movie.id) }}
       className={`group relative block shrink-0 ${SIZES[size]}`}
     >
       <motion.div
@@ -44,11 +44,6 @@ export function PosterCard({ movie, size = "md", showProgress }: Props) {
             </p>
           </div>
         </div>
-        {showProgress && movie.progress != null && (
-          <div className="absolute inset-x-0 bottom-0 h-1 bg-white/10">
-            <div className="h-full bg-white" style={{ width: `${movie.progress}%` }} />
-          </div>
-        )}
       </motion.div>
     </Link>
   );

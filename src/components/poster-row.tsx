@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
-import type { Movie } from "@/lib/movies";
+import type { SlateMovie } from "@/lib/movies";
 import { PosterCard } from "./poster-card";
 
 type Props = {
   title: string;
-  movies: Movie[];
+  movies: SlateMovie[];
   action?: ReactNode;
   showProgress?: boolean;
   size?: "sm" | "md" | "lg";

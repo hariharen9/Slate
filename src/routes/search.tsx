@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Search as SearchIcon } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { PosterTile } from "@/components/poster-tile";
-import { MOVIES } from "@/lib/movies";
+import { PosterSkeleton } from "@/components/poster-skeleton";
+import { searchQueryOptions, trendingQueryOptions } from "@/lib/tmdb-queries";
 
 export const Route = createFileRoute("/search")({
   head: () => ({
@@ -17,16 +19,31 @@ export const Route = createFileRoute("/search")({
 
 function SearchPage() {
   const [q, setQ] = useState("");
-  const results = useMemo(() => {
-    const t = q.trim().toLowerCase();
-    if (!t) return MOVIES;
-    return MOVIES.filter(
-      (m) =>
-        m.title.toLowerCase().includes(t) ||
-        m.genre.toLowerCase().includes(t) ||
-        m.vibes.some((v) => v.toLowerCase().includes(t)),
-    );
+  const [debouncedQ, setDebouncedQ] = useState("");
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQ(q.trim()), 300);
+    return () => clearTimeout(timer);
   }, [q]);
+
+  // Search TMDB when query is present
+  const {
+    data: searchData,
+    isLoading: searchLoading,
+    isFetching: searchFetching,
+  } = useQuery(searchQueryOptions(debouncedQ));
+
+  // Show trending when no search query
+  const { data: trendingData, isLoading: trendingLoading } = useQuery({
+    ...trendingQueryOptions(),
+    enabled: debouncedQ.length === 0,
+  });
+
+  const isSearching = debouncedQ.length > 0;
+  const results = isSearching ? (searchData?.results ?? []) : (trendingData?.results ?? []);
+  const isLoading = isSearching ? searchLoading : trendingLoading;
+  const totalResults = isSearching ? (searchData?.totalResults ?? 0) : (trendingData?.results.length ?? 0);
 
   return (
     <AppShell>
@@ -46,21 +63,35 @@ function SearchPage() {
             placeholder="rainy day, sci-fi, Villeneuve…"
             className="w-full bg-transparent font-serif text-2xl italic text-white placeholder:text-white/30 focus:outline-none"
           />
-          <span className="font-serif text-xs italic text-[var(--gold)]">
-            {results.length} results
+          <span className="shrink-0 font-serif text-xs italic text-[var(--gold)]">
+            {searchFetching ? (
+              <span className="inline-block h-3 w-3 animate-spin rounded-full border border-[var(--gold)] border-t-transparent" />
+            ) : isSearching ? (
+              `${totalResults} results`
+            ) : (
+              "trending"
+            )}
           </span>
         </div>
 
-        <div className="mt-10 grid auto-rows-[220px] grid-cols-2 gap-3 sm:auto-rows-[260px] sm:grid-cols-3 md:gap-4 lg:grid-cols-5">
-          {results.map((m) => (
-            <PosterTile key={m.id} movie={m} className="h-full w-full" />
-          ))}
-          {results.length === 0 && (
-            <p className="col-span-full py-16 text-center font-serif text-2xl italic text-white/40">
-              The vault is silent on that one.
-            </p>
-          )}
-        </div>
+        {isLoading ? (
+          <div className="mt-10 grid auto-rows-[220px] grid-cols-2 gap-3 sm:auto-rows-[260px] sm:grid-cols-3 md:gap-4 lg:grid-cols-5">
+            <PosterSkeleton count={10} className="h-full w-full" />
+          </div>
+        ) : (
+          <div className="mt-10 grid auto-rows-[220px] grid-cols-2 gap-3 sm:auto-rows-[260px] sm:grid-cols-3 md:gap-4 lg:grid-cols-5">
+            {results.map((m) => (
+              <PosterTile key={m.id} movie={m} className="h-full w-full" />
+            ))}
+            {results.length === 0 && (
+              <p className="col-span-full py-16 text-center font-serif text-2xl italic text-white/40">
+                {isSearching
+                  ? "The vault is silent on that one."
+                  : "Loading the catalog…"}
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </AppShell>
   );

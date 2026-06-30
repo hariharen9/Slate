@@ -1,7 +1,9 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Search, BarChart3, Bookmark } from "lucide-react";
+import { Home, Search, BarChart3, Bookmark, LogIn, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 import type { ReactNode } from "react";
+import { useAuth } from "@/lib/auth-context";
+import { toast } from "sonner";
 
 const NAV = [
   { to: "/", label: "Curated", icon: Home },
@@ -12,6 +14,12 @@ const NAV = [
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success("Signed out");
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -50,13 +58,49 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[var(--gold-soft)] to-[var(--gold)] ring-1 ring-white/20" />
-          <div className="leading-tight">
-            <p className="text-xs font-medium">Marcus A.</p>
-            <p className="text-[10px] uppercase tracking-widest text-white/40">Member · 2024</p>
+        {user ? (
+          <div className="flex items-center gap-3">
+            {user.photoURL ? (
+              <img
+                src={user.photoURL}
+                alt=""
+                className="h-9 w-9 rounded-full ring-1 ring-white/20 object-cover"
+              />
+            ) : (
+              <div className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-[var(--gold-soft)] to-[var(--gold)] ring-1 ring-white/20">
+                <span className="text-xs font-bold text-black">
+                  {(user.displayName ?? user.email ?? "U")[0].toUpperCase()}
+                </span>
+              </div>
+            )}
+            <div className="min-w-0 flex-1 leading-tight">
+              <p className="truncate text-xs font-medium">
+                {user.displayName ?? user.email?.split("@")[0] ?? "User"}
+              </p>
+              <button
+                onClick={handleSignOut}
+                className="flex items-center gap-1 text-[10px] uppercase tracking-widest text-white/40 hover:text-white/70 transition-colors"
+              >
+                <LogOut className="h-2.5 w-2.5" />
+                Sign Out
+              </button>
+            </div>
           </div>
-        </div>
+        ) : (
+          <Link to="/auth" className="flex items-center gap-3 group">
+            <div className="grid h-9 w-9 place-items-center rounded-full glass">
+              <LogIn className="h-4 w-4 text-white/50" />
+            </div>
+            <div className="leading-tight">
+              <p className="text-xs font-medium group-hover:text-white transition-colors">
+                Sign In
+              </p>
+              <p className="text-[10px] uppercase tracking-widest text-white/40">
+                Track your films
+              </p>
+            </div>
+          </Link>
+        )}
       </aside>
 
       <main className="lg:pl-56">{children}</main>
